@@ -235,38 +235,37 @@
 						);
 					}
 					if (!this.caughtGhost && this.stream) {
-						for (let i = 0; i < this.ghosts.length; i++) {
-							let ghost = this.ghosts[i];
-							if (ghost.isHit({ x: this.stream.x, y: this.stream.y })) {
-								this.caughtGhost = ghost;
-								this.caughtGhost.setTarget({
-									x: this.stream.x,
-									y: this.stream.y,
-								});
-								break;
-							}
-						}
-					}
-					for (let i = 0; i < this.ghosts.length; i++) {
-						this.ghosts[i].draw();
-					}
-					if (this.caughtGhost && this.stream) {
-						this.stream.setSticky(
-							{ x: this.caughtGhost.x, y: this.caughtGhost.y },
-							this.caughtGhost.radius
-						);
-					}
-					this.player.draw();
-					if (this.stream) this.stream.draw();
-					// if (progress < (1000 * this.GAME_LENGTH_SECONDS)) window.requestAnimationFrame((t:number) => {this.tick(t)});
-					// else this.end();
-					window.requestAnimationFrame((t) => {
-						this.tick(t);
-					});
+    for (let i = 0; i < this.ghosts.length; i++) {
+        let ghost = this.ghosts[i];
+        if (ghost.isHit({ x: this.stream.x, y: this.stream.y })) {
+            ghost.kill();               // Kill the ghost (fade and remove)
+            this.ghosts.splice(i, 1);   // Remove ghost from array
+            this.caughtGhost = null;    // Reset caughtGhost
+            break;
+        }
+    }
+}
+for (let i = 0; i < this.ghosts.length; i++) {
+    this.ghosts[i].draw();
+}
+if (this.caughtGhost && this.stream) {
+    this.stream.setSticky(
+        { x: this.caughtGhost.x, y: this.caughtGhost.y },
+        this.caughtGhost.radius
+    );
+}
+this.player.draw();
+if (this.stream) this.stream.draw();
+window.requestAnimationFrame((t) => {
+    this.tick(t);
+});
+
+					
 				}
 			}
 			class Ghost {
 				constructor(svg, x = 0, y = 0) {
+			
 					this.lightningLines = [];
 					this.x = 0;
 					this.y = 0;
@@ -349,6 +348,12 @@
 					this.hitPath.attr({ fill: 'red', fillOpacity: 0 });
 					this.draw();
 				}
+				
+				kill() {
+  this.group.animate({ opacity: 0 }, 500, () => {
+    this.group.remove();
+  });
+}
 				isHit(point) {
 					return Snap.path.isPointInside(
 						this.hitPath.attr('d'),
@@ -625,6 +630,7 @@
 								{ d: lineString, strokeOpacity: 0, strokeWidth: 1 },
 								500
 							);
+
 						}
 					}
 				}
